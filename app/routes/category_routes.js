@@ -1,10 +1,11 @@
-import { PrismaClient } from "@prisma/client";
+import prisma from "../helpers/prisma.js";
 import { Router } from "express";
+import { Permission } from "../middlewares/authorization.js";
+import authorize from "../middlewares/middleware.js";
 
-const prisma = new PrismaClient();
 const router = Router();
 
-router.post("/category", async (req, res) => {
+router.post("/category", authorize(Permission.ADD_CATEGORIES), async (req, res) => {
   const name = req.body;
 
   if (!req.body.name) {
@@ -20,7 +21,7 @@ router.post("/category", async (req, res) => {
   }
 });
 
-router.get("/category", async (req, res) => {
+router.get("/category", authorize(Permission.BROWSE_CATEGORIES), async (req, res) => {
   const category = await prisma.category.findMany();
   if (category.length === 0) {
     res.status(404).json({ message: "Category is Empty" });
@@ -29,7 +30,7 @@ router.get("/category", async (req, res) => {
   }
 });
 
-router.put("/category/:id", async (req, res) => {
+router.put("/category/:id", authorize(Permission.EDIT_CATEGORIES), async (req, res) => {
   if (isNaN(req.params.id)) {
     res.status(400).json({ message: "Invalid ID" });
   } else {
@@ -51,7 +52,7 @@ router.put("/category/:id", async (req, res) => {
   }
 });
 
-router.delete("/category/:id", async (req, res) => {
+router.delete("/category/:id", authorize(Permission.DELETE_CATEGORIES), async (req, res) => {
   if (isNaN(req.params.id)) {
     res.status(400).json({ message: "Invalid ID" });
   } else {
