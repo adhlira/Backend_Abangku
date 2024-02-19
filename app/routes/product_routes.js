@@ -13,20 +13,26 @@ router.get("/product", async (req, res) => {
   res.json(results);
 });
 
-router.post("/product", upload.single("image"), async (req, res) => {
-  const { name, description, price, category_id, quantity, rating } = req.body;
-  //   console.log(req.body);
-  const product = await prisma.product.create({
-    data: {
-      name,
-      description,
-      price: +price,
-      category_id: +category_id,
-      quantity: +quantity,
-      rating: +rating,
-    },
-  });
-  res.json({ product: product, data: "ok" });
-});
+router.post(
+  "/product",
+  upload.single("image"),
+  validateProductReqBody,
+  async (req, res) => {
+    const { name, description, price, category_id, quantity, rating } =
+      req.body;
+    //   console.log(req.body);
+    const product = await prisma.product.create({
+      data: {
+        name,
+        description,
+        price: +price,
+        category_id: +category_id,
+        quantity: +quantity,
+        rating: +rating,
+      },
+    });
+    res.json({ product: product, data: "ok" });
+  }
+);
 
 export default router;
