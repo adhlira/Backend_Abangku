@@ -18,6 +18,11 @@ model Admin {
   @@map("admins")
 }
 
+enum Gender {
+  male
+  female
+}
+
 model User {
   id         Int      @id @default(autoincrement())
   email      String   @unique
@@ -32,7 +37,7 @@ model User {
 
   membership_id Int
   role_id       Int
-  gender_id     Int?
+  gender        Gender?
   avatar_id     Int?     @unique
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
@@ -42,7 +47,6 @@ model User {
   Carts        Cart[]
   Role         Role         @relation(fields: [role_id], references: [id])
   Membership   Membership   @relation(fields: [membership_id], references: [id])
-  Gender       Gender?      @relation(fields: [gender_id], references: [id])
   Avatar_Image AvatarImage? @relation(fields: [avatar_id], references: [id])
 
   @@map("users")
@@ -99,10 +103,8 @@ model Product {
   updated_at  DateTime @updatedAt
 
   category_id Int
-  gender_id   Int
 
   Category     Category       @relation(fields: [category_id], references: [id])
-  Gender       Gender         @relation(fields: [gender_id], references: [id])
   Order_Items  OrderItem[]
   Carts        Cart[]
   ProductSize  ProductSize[]
@@ -150,16 +152,6 @@ model Size {
   ProductSize ProductSize[]
 
   @@map("sizes")
-}
-
-model Gender {
-  id   Int    @id @default(autoincrement())
-  name String @unique
-
-  Product Product[]
-  User    User[]
-
-  @@map("genders")
 }
 
 model Category {
