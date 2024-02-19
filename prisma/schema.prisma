@@ -1,0 +1,259 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id       Int    @id
+  username String
+  password String
+
+  @@map("admins")
+}
+
+model User {
+  id         Int      @id @default(autoincrement())
+  email      String   @unique
+  password   String
+  username   String   @unique
+  first_name String?
+  last_name  String?
+  phone      String?  @unique
+  address    String?
+  lat        Decimal?
+  long       Decimal?
+
+  membership_id Int
+  role_id       Int
+  gender_id     Int?
+  avatar_id     Int?     @unique
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+  is_banned     Boolean  @default(false)
+
+  Orders       Order[]
+  Carts        Cart[]
+  Role         Role         @relation(fields: [role_id], references: [id])
+  Membership   Membership   @relation(fields: [membership_id], references: [id])
+  Gender       Gender?      @relation(fields: [gender_id], references: [id])
+  Avatar_Image AvatarImage? @relation(fields: [avatar_id], references: [id])
+
+  @@map("users")
+}
+
+model Membership {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  Users User[]
+
+  @@map("memberships")
+}
+
+model Role {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  Users       User[]
+  Permissions PermissionRole[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  Roles PermissionRole[]
+
+  @@map("permissions")
+}
+
+model PermissionRole {
+  permission_id Int
+  role_id       Int
+  permission    Permission @relation(fields: [permission_id], references: [id])
+  role          Role       @relation(fields: [role_id], references: [id])
+
+  @@id([permission_id, role_id])
+  @@map("permission_role")
+}
+
+model Product {
+  id       Int    @id @default(autoincrement())
+  name     String
+  price    Float
+  quantity Int
+  rating   Float
+
+  is_deleted  Boolean  @default(false)
+  description String?  @db.Text
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  category_id Int
+  gender_id   Int
+
+  Category     Category       @relation(fields: [category_id], references: [id])
+  Gender       Gender         @relation(fields: [gender_id], references: [id])
+  Order_Items  OrderItem[]
+  Carts        Cart[]
+  ProductSize  ProductSize[]
+  ColorProduct ColorProduct[]
+  ProductImage ProductImage[]
+
+  @@map("products")
+}
+
+model ProductSize {
+  product_id Int
+  size_id    Int
+
+  Product Product @relation(fields: [product_id], references: [id])
+  Size    Size    @relation(fields: [size_id], references: [id])
+
+  @@id([size_id, product_id])
+  @@map("product_size")
+}
+
+model ColorProduct {
+  product_id Int
+  color_id   Int
+
+  Product Product @relation(fields: [product_id], references: [id])
+  Color   Color   @relation(fields: [color_id], references: [id])
+
+  @@id([color_id, product_id])
+  @@map("color_product")
+}
+
+model Color {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  ColorProduct ColorProduct[]
+
+  @@map("colors")
+}
+
+model Size {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  ProductSize ProductSize[]
+
+  @@map("sizes")
+}
+
+model Gender {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  Product Product[]
+  User    User[]
+
+  @@map("genders")
+}
+
+model Category {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  Products Product[]
+
+  @@map("categories")
+}
+
+model AvatarImage {
+  id         Int      @id @default(autoincrement())
+  image_url  String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  User       User?
+
+  @@map("avatar_images")
+}
+
+model ProductImage {
+  id         Int      @id @default(autoincrement())
+  image_url  String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  product_id Int
+
+  Product Product @relation(fields: [product_id], references: [id])
+
+  @@map("product_images")
+}
+
+enum Status {
+  PENDING
+  PAID
+  CANCELLED
+}
+
+model Order {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  invoice    String   @unique @db.VarChar(255)
+  status     Status   @default(PENDING) @map("payment_status")
+  total      Float
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  Order_Items OrderItem[]
+  User        User        @relation(fields: [user_id], references: [id])
+
+  @@map("orders")
+}
+
+model OrderItem {
+  order_id    Int
+  product_id  Int
+  quantity    Int
+  price       Float
+  total_price Float
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  Product Product @relation(fields: [product_id], references: [id])
+  Order   Order   @relation(fields: [order_id], references: [id])
+
+  @@id([order_id, product_id])
+  @@map("order_items")
+}
+
+model Cart {
+  id          Int      @id @default(autoincrement())
+  user_id     Int
+  product_id  Int
+  quantity    Int
+  total_price Float
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  User    User    @relation(fields: [user_id], references: [id])
+  Product Product @relation(fields: [product_id], references: [id])
+
+  @@map("carts")
+}
+
+model Coupon {
+  id         Int      @id @default(autoincrement())
+  name       String
+  code       String   @unique
+  discount   Float
+  is_expired Boolean  @default(false)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  expires_at DateTime
+
+  @@map("coupons")
+}
