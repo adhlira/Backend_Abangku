@@ -1,4 +1,4 @@
-const Error = {
+const ErrorConstants = {
   400: "Bad Request",
   401: "Unauthorized",
   402: "Payment Required",
@@ -7,4 +7,4 @@ const Error = {
   500: "Internal Server Error",
 };
 
-export default Error;
+export default ErrorConstants;

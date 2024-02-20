@@ -1,8 +1,8 @@
 import validator from "validator";
 
 const validateRegister = (req, res, next) => {
-  const { username, email, password, phone } = req.body;
-  if (!username || !email || !password || !phone) {
+  const { username, email, password, phone,fullname } = req.body;
+  if (!username || !email || !password || !phone || !fullname) {
     return res.status(400).json({
       message: "All fields are required",
     });
