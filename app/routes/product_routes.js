@@ -45,7 +45,8 @@ router.post("/product", upload.single("image"), validateProductReqBody, async (r
   }
 });
 
-router.put("/product/:id", async (req, res) => {
+router.put("/product/:id", upload.single("image"), async (req, res) => {
+  const rootUrl = `${req.protocol}://${req.get("host")}`;
   if (isNaN(req.params.id)) {
     res.status(400).json({ message: "Invalid ID" });
   } else {
@@ -53,7 +54,11 @@ router.put("/product/:id", async (req, res) => {
     if (!product_id) {
       res.status(404).json({ message: "Product Not Found" });
     } else {
-      const updated_product = await prisma.product.update({ where: { id: Number(req.params.id) }, data: req.body });
+      const { name, price, quantity, description, rating } = req.body;
+      const updated_product = await prisma.product.update({ where: { id: Number(req.params.id) }, data: { name, price: +price, quantity: +quantity, description, rating: +rating } });
+      if (req.file) {
+        await prisma.productImage.update({ where: { id: product_id.id }, data: { image_url: `${rootUrl}/static/${req.file.originalname}` } });
+      }
       res.status(200).json({ message: "Product has been updated", updated_product });
     }
   }
