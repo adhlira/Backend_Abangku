@@ -1,7 +1,7 @@
 import prisma from "../app/helpers/prisma.js";
 
 const main = async () => {
-  try {
+  try {    
     await prisma.size.createMany({
       data: [
         { name: "S" },
@@ -9,6 +9,14 @@ const main = async () => {
         { name: "L" },
         { name: "XL" },
         { name: "XXL" },
+      ],
+    });
+    await prisma.category.createMany({
+      data: [
+        { name: "Men" },
+        { name: "Women" },
+        { name: "Kids" },
+        { name: "Family" },
       ],
     });
   } catch (error) {
