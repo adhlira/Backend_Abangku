@@ -28,8 +28,7 @@ model User {
   email      String   @unique
   password   String
   username   String   @unique
-  first_name String?
-  last_name  String?
+  fullname   String
   phone      String?  @unique
   address    String?
   lat        Decimal?
