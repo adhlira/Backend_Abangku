@@ -6,7 +6,7 @@ import bcrypt from "bcrypt";
 const router = Router();
 
 router.post("/register", validateRegister, async (req, res) => {
-  const { username, email, password, phone } = req.body;
+  const { username, email, password, phone , fullname} = req.body;
   console.log(req.body);
   try {
     // check if username already exist
@@ -45,6 +45,7 @@ router.post("/register", validateRegister, async (req, res) => {
     const result = await prisma.user.create({
       data: {
         username: username,
+        fullname: fullname,
         email: email.toLowerCase(),
         password: bcrypt.hashSync(`${password}`, +process.env.BCRYPT_ROUNDS),
         phone: phone,
