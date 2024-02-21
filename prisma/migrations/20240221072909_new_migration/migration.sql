@@ -13,21 +13,22 @@ CREATE TABLE `users` (
     `email` VARCHAR(191) NOT NULL,
     `password` VARCHAR(191) NOT NULL,
     `username` VARCHAR(191) NOT NULL,
-    `first_name` VARCHAR(191) NULL,
-    `last_name` VARCHAR(191) NULL,
+    `fullname` VARCHAR(191) NOT NULL,
     `phone` VARCHAR(191) NULL,
     `address` VARCHAR(191) NULL,
     `lat` DECIMAL(65, 30) NULL,
     `long` DECIMAL(65, 30) NULL,
     `membership_id` INTEGER NOT NULL,
     `role_id` INTEGER NOT NULL,
-    `gender_id` INTEGER NULL,
+    `gender` ENUM('male', 'female') NULL,
     `avatar_id` INTEGER NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
     `is_banned` BOOLEAN NOT NULL DEFAULT false,
 
     UNIQUE INDEX `users_email_key`(`email`),
+    UNIQUE INDEX `users_username_key`(`username`),
+    UNIQUE INDEX `users_phone_key`(`phone`),
     UNIQUE INDEX `users_avatar_id_key`(`avatar_id`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -73,12 +74,12 @@ CREATE TABLE `products` (
     `name` VARCHAR(191) NOT NULL,
     `price` DOUBLE NOT NULL,
     `quantity` INTEGER NOT NULL,
+    `rating` DOUBLE NOT NULL,
     `is_deleted` BOOLEAN NOT NULL DEFAULT false,
     `description` TEXT NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
     `category_id` INTEGER NOT NULL,
-    `gender_id` INTEGER NOT NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -114,15 +115,6 @@ CREATE TABLE `sizes` (
     `name` VARCHAR(191) NOT NULL,
 
     UNIQUE INDEX `sizes_name_key`(`name`),
-    PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- CreateTable
-CREATE TABLE `genders` (
-    `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `name` VARCHAR(191) NOT NULL,
-
-    UNIQUE INDEX `genders_name_key`(`name`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -176,6 +168,7 @@ CREATE TABLE `order_items` (
     `quantity` INTEGER NOT NULL,
     `price` DOUBLE NOT NULL,
     `total_price` DOUBLE NOT NULL,
+    `shipment_fee` DOUBLE NOT NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
 
@@ -217,9 +210,6 @@ ALTER TABLE `users` ADD CONSTRAINT `users_role_id_fkey` FOREIGN KEY (`role_id`) 
 ALTER TABLE `users` ADD CONSTRAINT `users_membership_id_fkey` FOREIGN KEY (`membership_id`) REFERENCES `memberships`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `users` ADD CONSTRAINT `users_gender_id_fkey` FOREIGN KEY (`gender_id`) REFERENCES `genders`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE `users` ADD CONSTRAINT `users_avatar_id_fkey` FOREIGN KEY (`avatar_id`) REFERENCES `avatar_images`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -230,9 +220,6 @@ ALTER TABLE `permission_role` ADD CONSTRAINT `permission_role_role_id_fkey` FORE
 
 -- AddForeignKey
 ALTER TABLE `products` ADD CONSTRAINT `products_category_id_fkey` FOREIGN KEY (`category_id`) REFERENCES `categories`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `products` ADD CONSTRAINT `products_gender_id_fkey` FOREIGN KEY (`gender_id`) REFERENCES `genders`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `product_size` ADD CONSTRAINT `product_size_product_id_fkey` FOREIGN KEY (`product_id`) REFERENCES `products`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
