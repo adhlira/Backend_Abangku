@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "nodemon server.js",
-    "seed": "node ./database/membership_seed.js && node ./database/role_seed.js && node ./database/size_and_category_seed.js"
+    "seed": "node ./database/membership_seed.js && node ./database/role_seed.js && node ./database/size_and_category_seed.js",
+    "product":"node ./database/product_seed_men.js && node ./database/product_seed_women.js && node ./database/product_seed_kids.js && node ./database/product_size_seed.js"
   },
   "keywords": [],
   "author": "",
@@ -24,5 +25,8 @@
     "nodemon": "^3.0.3",
     "prisma": "^5.9.1",
     "validator": "^13.11.0"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^8.4.1"
   }
 }
