@@ -24,7 +24,7 @@ const main = async () => {
         await tx.productImage.create({
           data: {
             product_id: product.id,
-            image_url: `http://localhost:5000/static/product_${product.id}_k.png`,
+            image_url: `http://localhost:5000/static/product_${i}_k.png`,
           },
         });
       });
