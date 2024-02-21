@@ -4,14 +4,29 @@ import { faker } from "@faker-js/faker";
 const main = async () => {
   try {
     // await prisma.product.deleteMany({});
+    const womenClothingNames = [
+      "Femme Fatale Fashion House",
+      "Blossom & Lace Boutique Collective",
+      "Elegance Ensembles Emporium",
+      "Serene Silhouettes Style Studio",
+      "Radiant Roses Couture Creations",
+      "Empress Elegance Collection Co.",
+      "Enchantress Apparel Emporium",
+      "Graceful Garments Galore",
+      "Siren Styles Studio",
+      "Bloom & Chic Designs Boutique",
+      "Opulent Orchid Attire Boutique",
+      "Luminary Lady Line Collections",
+      "Muse & Magnolia Boutique Haven",
+    ];
     for (let i = 0; i < 12; i++) {
       await prisma.$transaction(async (tx) => {
         const product = await tx.product.create({
           data: {
-            name: faker.commerce.productName(),
+            name: womenClothingNames[i],
             price:
               Math.floor(
-                +faker.commerce.price({ min: 100000, max: 400000 }) / 1000
+                +faker.commerce.price({ min: 200000, max:5400000 }) / 1000
               ) * 1000,
             quantity: faker.number.int({ min: 10, max: 100 }),
             is_deleted: false,

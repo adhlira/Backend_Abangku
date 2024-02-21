@@ -1,6 +1,7 @@
 import { Router } from "express";
 import prisma from "../helpers/prisma.js";
 import fs from "fs";
+import path from "path";
 import upload from "../middlewares/image_middleware.js";
 import { validateProductReqBody } from "../validators/validate_req_body.js";
 import ErrorConstants from "../constant/errors.js";
@@ -28,7 +29,7 @@ router.get("/product", async (req, res) => {
             },
           },
         },
-      }
+      },
     },
   });
   res.json(results);
@@ -57,13 +58,36 @@ router.post(
         });
 
         if (req.file) {
+          let fileName;
+          switch (+category_id) {
+            case 1:
+              fileName = `product_${product.id}.jpg`;
+              break;
+            case 2:
+              fileName = `product_${product.id}_w.jpg`;
+              break;
+            case 3:
+              fileName = `product_${product.id}_k.jpg`;
+              break;
+            case 4:
+              fileName = `cp${product.id}.jpg`;
+              break;
+            default:
+              fileName;
+              break;
+          }
+
           await tx.productImage.create({
             data: {
               product_id: product.id,
-              image_url: `${rootUrl}/static/${req.file.originalname}`,
+              image_url: `${rootUrl}/static/${fileName}`,
             },
           });
+
+          const newPath = path.join("public/images", fileName);
+          fs.renameSync(req.file.path, newPath);
         }
+
         return product;
       });
       res.json({ product: product, data: "ok" });
