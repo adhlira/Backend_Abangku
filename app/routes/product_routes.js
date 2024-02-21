@@ -20,6 +20,15 @@ router.get("/product", async (req, res) => {
           image_url: true,
         },
       },
+      ProductSize: {
+        select: {
+          Size: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      }
     },
   });
   res.json(results);
