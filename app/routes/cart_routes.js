@@ -63,20 +63,43 @@ router.post("/cart", authenticateToken, validateCartReqBody, async (req, res) =>
 router.get("/cart", authenticateToken, async (req, res) => {
   const user_id = req.user.id;
   const results = await prisma.cart.findMany({ where: { user_id: user_id } });
+  if (results.length === 0) {
+    res.status(404).json({ message: "Cart is Empty" });
+  }
   res.status(200).json(results);
 });
 
 router.put("/cart/:id", authenticateToken, async (req, res) => {
+  const { quantity } = req.body;
   const user_id = req.user.id;
-  const cart = prisma.cart.findMany({ where: { user_id: user_id } });
+  const cart = await prisma.cart.findFirst({ where: { user_id: user_id } });
+
+  const product = await prisma.product.findFirst({ where: { id: cart.product_id } });
   if (isNaN(req.params.id)) {
     res.status(400).json({ message: "Invalid ID" });
   } else {
-    if (!cart) {
-      res.status(404).json({ message: "Cart is Not Found" });
+    const cart_id = await prisma.cart.findFirst({ where: { id: Number(req.params.id), user_id: user_id } });
+    if (!cart_id) {
+      res.status(404).json({ message: "Card ID Not Found" });
     } else {
-      const cart_updated = await prisma.cart.update({ where: { id: Number(req.params.id) }, data: req.body });
+      const cart_updated = await prisma.cart.update({ where: { id: Number(req.params.id) }, data: { quantity, total_price: quantity * product.price } });
       res.status(200).json({ message: "Cart updated", cart_updated });
+    }
+  }
+});
+
+router.delete("/cart/:id", authenticateToken, async (req, res) => {
+  const user_id = req.user.id;
+
+  if (isNaN(req.params.id)) {
+    res.status(400).json({ message: "Invalid ID" });
+  } else {
+    const cart_id = await prisma.cart.findFirst({ where: { id: Number(req.params.id), user_id: user_id } });
+    if (!cart_id) {
+      res.status(404).json({ message: "Cart ID Not Found" });
+    } else {
+      await prisma.cart.delete({ where: { id: Number(req.params.id) } });
+      res.status(200).json({ message: "Cart deleted" });
     }
   }
 });
