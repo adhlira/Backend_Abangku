@@ -20,4 +20,15 @@ app.options("*", cors());
 app.use(express.json());
 app.use(router);
 
+// app.get('/', (req, res) => {
+//   res.send('Hello World!');
+// });
+
+// // Rute untuk endpoint "/products"
+// app.get('/products', (req, res) => {
+//   res.send('List of products');
+// });
+
+
+
 export default app;

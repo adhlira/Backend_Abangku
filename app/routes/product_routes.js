@@ -247,42 +247,36 @@ router.put("/product/:id", upload.single("image"), validateProductReqBody, async
   }
 });
 
-router.delete("/product/:id", authorize(Permission.DELETE_PRODUCTS), async (req, res) => {
-  if (isNaN(req.params.id)) {
-    res.status(400).json({
-      message: "Invalid ID",
-    });
-  } else {
-    const product_id = await prisma.product.findFirst({
-      where: {
-        id: Number(req.params.id),
-      },
-    });
-    if (!product_id) {
-      res.status(404).json({
-        message: "Product Not Found",
-      });
-    } else {
-      const product_id = await prisma.productImage.findFirst({
-        where: {
-          product_id: Number(req.params.id),
-        },
-      });
-      await prisma.productImage.delete({
-        where: {
-          id: product_id.id,
-        },
-      });
-      await prisma.product.delete({
-        where: {
-          id: Number(req.params.id),
-        },
-      });
-      res.status(200).json({
-        message: "Product has been deleted",
-      });
-    }
-  }
-});
+// router.delete("/product/:id", async (req, res) => {
+//   const productId = parseInt(req.params.id);
+//       const product = await prisma.product.findUnique({
+//       where: { id: productId },
+//     });
+//     if (!product_id) {
+//       res.status(404).json({
+//         message: "Product Not Found",
+//       });
+//     } else {
+//       const product_id = await prisma.productImage.findFirst({
+//         where: {
+//           product_id: Number(req.params.id),
+//         },
+//       });
+//       await prisma.productImage.delete({
+//         where: {
+//           id: product_id.id,
+//         },
+//       });
+//       await prisma.product.delete({
+//         where: {
+//           id: Number(req.params.id),
+//         },
+//       });
+//       res.status(200).json({
+//         message: "Product has been deleted",
+//       });
+//     }
+  
+// });
 
 export default router;
