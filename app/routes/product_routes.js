@@ -49,6 +49,15 @@ router.get("/product/:id", async (req, res) => {
             image_url: true,
           },
         },
+        ProductSize: {
+          select: {
+            Size: {
+              select: {
+                name: true,
+              }
+            }
+          }
+        }
       },
       where: { id: Number(req.params.id) },
     });
