@@ -36,6 +36,19 @@ router.get("/product", async (req, res) => {
   res.json(results);
 });
 
+router.get("/product/:id", async (req, res) => {
+  if (isNaN(req.params.id)) {
+    res.status(400).json({ message: "Invalid ID" });
+  } else {
+    const product = await prisma.product.findFirst({ where: { id: Number(req.params.id) } });
+    if (!product) {
+      res.status(404).json({ message: "Product Not Found" });
+    } else {
+      res.status(200).json(product);
+    }
+  }
+});
+
 router.post("/product", upload.single("image"), validateProductReqBody, authorize(Permission.ADD_PRODUCTS), async (req, res) => {
   const { name, description, price, category_id, quantity, rating } = req.body;
   const rootUrl = `${req.protocol}://${req.get("host")}`;
