@@ -10,6 +10,7 @@ import authorize from "../middlewares/middleware.js";
 const router = Router();
 
 router.get("/product", async (req, res) => {
+  const { name } = req.query;
   const results = await prisma.product.findMany({
     include: {
       Category: {
@@ -32,6 +33,7 @@ router.get("/product", async (req, res) => {
         },
       },
     },
+    where: { name: { contains: name } },
   });
   res.json(results);
 });
