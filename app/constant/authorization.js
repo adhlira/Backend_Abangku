@@ -75,15 +75,15 @@ export const PermissionAssignment = {
     Permission.READ_USERS,
     Permission.EDIT_USERS,
 
-    Permission.BROWSE_CART,
-    Permission.READ_CART,
-    Permission.EDIT_CART,
-    Permission.ADD_CART,
-    Permission.DELETE_CART,
+    Permission.BROWSE_CARTS,
+    Permission.READ_CARTS,
+    Permission.EDIT_CARTS,
+    Permission.ADD_CARTS,
+    Permission.DELETE_CARTS,
 
     Permission.READ_ORDERS,
     Permission.ADD_ORDERS,
 
-    Permission.ADD_PAYMENT,
+    Permission.ADD_PAYMENTS,
   ],
 };
