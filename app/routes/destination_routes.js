@@ -1,8 +1,9 @@
 import { Router } from "express";
 import prisma from "../helpers/prisma.js";
 import authenticateToken from "../middlewares/authenticate_token.js";
-import axios from "axios";
 import dotenv from "dotenv";
+import axios from 'axios';
+
 
 dotenv.config();
 const router = Router();

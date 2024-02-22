@@ -1,0 +1,15 @@
+export const ORDER_STATUS = {
+    WAITING_FOR_PAYMENT: "WAITING_FOR_PAYMENT",
+    PAID: "PAID",
+    DELIVERED: "DELIVERED",
+    COMPLETED: "COMPLETED",
+    CANCELLED: "CANCELLED"
+  }
+  
+  export const ADD_1H = 1
+  
+  export const ORDER_SHIPPING = {
+    ORDER_ORIGIN: 501,
+    ORDER_COURIER: "jne"
+  }
+  

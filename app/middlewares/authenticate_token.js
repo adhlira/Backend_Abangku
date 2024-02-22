@@ -1,18 +1,24 @@
 import Jwt from "jsonwebtoken";
-export default function authenticateToken(req, res, next) {
+import prisma from "../helpers/prisma.js";
+
+export default async function authenticateToken(req, res, next) {
   const authHeader = req.headers["authorization"];
-  //   const token = authHeader && authHeader.split(" ")[1];
-  if (authHeader == null) return res.sendStatus(401);
+  if (!authHeader) return res.sendStatus(401);
 
   try {
-    const user = Jwt.verify(authHeader, process.env.JWT_SECRET);
-    req.user = user;
+    const token = authHeader.split(" ")[1];
+    if (!token) return res.sendStatus(401);
 
-    if (user.is_banned === true) {
-      return res.status(401).json({ error: "You are banned" });
-    }
+    const decoded = Jwt.verify(token, process.env.JWT_SECRET);
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.id },
+    });
+    if (!user) return res.sendStatus(401);
+
+    req.user = user;
     next();
   } catch (err) {
+    console.error(err);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 }

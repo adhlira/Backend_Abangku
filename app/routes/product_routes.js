@@ -105,24 +105,52 @@ router.put(
   }
 );
 
+// router.delete("/product/:id", async (req, res) => {
+//   if (isNaN(req.params.id)) {
+//     res.status(400).json({ message: "Invalid ID" });
+//   } else {
+//     const product_id = await prisma.product.findFirst({
+//       where: { id: Number(req.params.id) },
+//     });
+//     if (!product_id) {
+//       res.status(404).json({ message: "Product Not Found" });
+//     } else {
+//       const product_id = await prisma.productImage.findFirst({
+//         where: { product_id: Number(req.params.id) },
+//       });
+//       await prisma.productImage.delete({ where: { id: product_id.id } });
+//       await prisma.product.delete({ where: { id: Number(req.params.id) } });
+//       res.status(200).json({ message: "Product has been deleted" });
+//     }
+//   }
+// });
 router.delete("/product/:id", async (req, res) => {
-  if (isNaN(req.params.id)) {
-    res.status(400).json({ message: "Invalid ID" });
-  } else {
-    const product_id = await prisma.product.findFirst({
-      where: { id: Number(req.params.id) },
+  const productId = parseInt(req.params.id);
+  try {
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
     });
-    if (!product_id) {
-      res.status(404).json({ message: "Product Not Found" });
-    } else {
-      const product_id = await prisma.productImage.findFirst({
-        where: { product_id: Number(req.params.id) },
-      });
-      await prisma.productImage.delete({ where: { id: product_id.id } });
-      await prisma.product.delete({ where: { id: Number(req.params.id) } });
-      res.status(200).json({ message: "Product has been deleted" });
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
     }
+
+    // Hapus terlebih dahulu entri terkait dalam ProductSize
+    await prisma.productSize.deleteMany({
+      where: { product_id: productId },
+    });
+
+    // Kemudian, hapus produk itu sendiri
+    await prisma.product.delete({
+      where: { id: productId },
+    });
+
+    res.status(200).json({ message: "Product has been deleted" });
+  } catch (error) {
+    console.error("Error deleting product:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
+
+
 
 export default router;

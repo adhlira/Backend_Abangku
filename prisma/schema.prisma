@@ -24,15 +24,15 @@ enum Gender {
 }
 
 model User {
-  id         Int      @id @default(autoincrement())
-  email      String   @unique
-  password   String
-  username   String   @unique
-  fullname   String
-  phone      String?  @unique
-  address    String?
-  lat        Decimal?
-  long       Decimal?
+  id       Int      @id @default(autoincrement())
+  email    String   @unique
+  password String
+  username String   @unique
+  fullname String
+  phone    String?  @unique
+  address  String?
+  lat      Decimal?
+  long     Decimal?
 
   membership_id Int
   role_id       Int
@@ -192,7 +192,7 @@ enum Status {
 
 model Order {
   id         Int      @id @default(autoincrement())
-  user_id    Int
+  user_id    Int?
   invoice    String   @unique @db.VarChar(255)
   status     Status   @default(PENDING) @map("payment_status")
   total      Float
@@ -200,7 +200,7 @@ model Order {
   updated_at DateTime @updatedAt
 
   Order_Items OrderItem[]
-  User        User        @relation(fields: [user_id], references: [id])
+  User        User?       @relation(fields: [user_id], references: [id])
 
   @@map("orders")
 }
