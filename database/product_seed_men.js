@@ -4,11 +4,25 @@ import { faker } from "@faker-js/faker";
 const main = async () => {
   try {
     // await prisma.product.deleteMany({});
-    for (let i = 0; i < 11; i++) {
+    const clothingBrandNames = [
+      "Vanguard Apparel",
+      "Gentlemen's Haven",
+      "Urban Gents Attire",
+      "Noble Threads",
+      "Heritage Hues",
+      "Masculine Moda",
+      "Refined Raiment",
+      "Dapper Domain",
+      "Manifold Styles Co.",
+      "Stalwart Sartorial",
+      "Classic Chaps Collection",
+      "Swagger & Stitch",
+    ];
+    for (let i = 0; i < 12; i++) {
       await prisma.$transaction(async (tx) => {
         await tx.product.create({
           data: {
-            name: faker.commerce.productName(),
+            name: clothingBrandNames[i],
             price:
               Math.floor(
                 +faker.commerce.price({ min: 100000, max: 400000 }) / 1000
@@ -22,7 +36,7 @@ const main = async () => {
         });
         await tx.productImage.create({
           data: {
-            product_id: i+1,
+            product_id: i + 1,
             image_url: `http://localhost:5000/static/product_${i}.png`,
           },
         });

@@ -2,7 +2,7 @@
 import express from 'express';
 import { createOrder, getOrderById } from '../orderModel.js';
 import { createOrderItem } from '../orderItemModel.js';
-import { authorize } from '../middlewares/authorization.js';
+import { authorize } from '../constant/authorization.js';
 
 const router = express.Router();
 

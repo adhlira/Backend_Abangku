@@ -29,7 +29,7 @@ export const authorize = (permission) => {
 };
 
 export const Role = {
-  SELLER: "seller",
+  ADMIN: "admin",
   REGULAR_USER: "regular_user",
 };
 
@@ -46,17 +46,19 @@ export const Permission = {
   ADD_PRODUCTS: "add_products",
   DELETE_PRODUCTS: "delete_products",
 
-  BROWSE_CART: "browse_cart",
-  READ_CART: "read_cart",
-  EDIT_CART: "edit_cart",
-  ADD_CART: "add_cart",
-  DELETE_CART: "delete_cart",
+  BROWSE_CARTS: "browse_carts",
+  READ_CARTS: "read_carts",
+  EDIT_CARTS: "edit_carts",
+  ADD_CARTS: "add_carts",
+  DELETE_CARTS: "delete_carts",
 
   BROWSE_ORDERS: "browse_orders",
   READ_ORDERS: "read_orders",
+  EDIT_ORDERS: "edit_orders",
   ADD_ORDERS: "add_orders",
+  DELETE_ORDERS: "delete_orders",
 
-  ADD_PAYMENT: "add_payment",
+  ADD_PAYMENTS: "add_payments",
 
   BROWSE_USERS: "browse_users",
   READ_USERS: "read_users",
@@ -66,7 +68,7 @@ export const Permission = {
 };
 
 export const PermissionAssignment = {
-  [Role.SELLER]: [
+  [Role.ADMIN]: [
     Permission.BROWSE_CATEGORIES,
     Permission.READ_CATEGORIES,
     Permission.EDIT_CATEGORIES,
@@ -81,10 +83,14 @@ export const PermissionAssignment = {
 
     Permission.BROWSE_ORDERS,
     Permission.READ_ORDERS,
+    Permission.EDIT_ORDERS,
+    Permission.ADD_ORDERS,
+    Permission.DELETE_ORDERS,
 
     Permission.BROWSE_USERS,
     Permission.READ_USERS,
     Permission.EDIT_USERS,
+    Permission.ADD_USERS,
     Permission.DELETE_USERS,
   ],
 
@@ -99,15 +105,15 @@ export const PermissionAssignment = {
     Permission.READ_USERS,
     Permission.EDIT_USERS,
 
-    Permission.BROWSE_CART,
-    Permission.READ_CART,
-    Permission.EDIT_CART,
-    Permission.ADD_CART,
-    Permission.DELETE_CART,
+    Permission.BROWSE_CARTS,
+    Permission.READ_CARTS,
+    Permission.EDIT_CARTS,
+    Permission.ADD_CARTS,
+    Permission.DELETE_CARTS,
 
     Permission.READ_ORDERS,
     Permission.ADD_ORDERS,
 
-    Permission.ADD_PAYMENT,
+    Permission.ADD_PAYMENTS,
   ],
 };
