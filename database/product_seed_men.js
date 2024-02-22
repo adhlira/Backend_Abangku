@@ -18,7 +18,7 @@ const main = async () => {
       "Classic Chaps Collection",
       "Swagger & Stitch",
     ];
-    for (let i = 0; i < 11; i++) {
+    for (let i = 0; i < 12; i++) {
       await prisma.$transaction(async (tx) => {
         await tx.product.create({
           data: {

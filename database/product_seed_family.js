@@ -17,7 +17,7 @@ const main = async () => {
       "Bonded by Threads"
     ];
 
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 9; i++) {
       await prisma.$transaction(async (tx) => {
         const product = await tx.product.create({
           data: {
