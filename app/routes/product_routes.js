@@ -1,17 +1,22 @@
-import { Router } from "express";
+import {
+  Router
+} from "express";
 import prisma from "../helpers/prisma.js";
 import fs from "fs";
 import path from "path";
 import upload from "../middlewares/image_middleware.js";
-import { validateProductReqBody } from "../validators/validate_req_body.js";
-import { Permission } from "../constant/authorization.js";
+import {
+  validateProductReqBody
+} from "../validators/validate_req_body.js";
+import {
+  Permission
+} from "../constant/authorization.js";
 import authorize from "../middlewares/middleware.js";
 
 const router = Router();
 
 router.get(
   "/product",
-  authorize(Permission.BROWSE_PRODUCTS),
   async (req, res) => {
     const results = await prisma.product.findMany({
       include: {
@@ -46,8 +51,15 @@ router.post(
   validateProductReqBody,
   authorize(Permission.ADD_PRODUCTS),
   async (req, res) => {
-    const { name, description, price, category_id, quantity, rating } =
-      req.body;
+    const {
+      name,
+      description,
+      price,
+      category_id,
+      quantity,
+      rating
+    } =
+    req.body;
     const rootUrl = `${req.protocol}://${req.get("host")}`;
     //   console.log(req.body);
     try {
@@ -96,7 +108,10 @@ router.post(
 
         return product;
       });
-      res.json({ product: product, data: "ok" });
+      res.json({
+        product: product,
+        data: "ok"
+      });
     } catch (error) {
       fs.unlinkSync(req.file.path);
       res.status(500).json(error.message);
@@ -112,17 +127,31 @@ router.put(
   async (req, res) => {
     const rootUrl = `${req.protocol}://${req.get("host")}`;
     if (isNaN(req.params.id)) {
-      res.status(400).json({ message: "Invalid ID" });
+      res.status(400).json({
+        message: "Invalid ID"
+      });
     } else {
       const product_id = await prisma.product.findFirst({
-        where: { id: Number(req.params.id) },
+        where: {
+          id: Number(req.params.id)
+        },
       });
       if (!product_id) {
-        res.status(404).json({ message: "Product Not Found" });
+        res.status(404).json({
+          message: "Product Not Found"
+        });
       } else {
-        const { name, price, quantity, description, rating } = req.body;
+        const {
+          name,
+          price,
+          quantity,
+          description,
+          rating
+        } = req.body;
         const updated_product = await prisma.product.update({
-          where: { id: Number(req.params.id) },
+          where: {
+            id: Number(req.params.id)
+          },
           data: {
             name,
             price: +price,
@@ -133,13 +162,20 @@ router.put(
         });
         if (req.file) {
           await prisma.productImage.update({
-            where: { id: product_id.id },
-            data: { image_url: `${rootUrl}/static/${req.file.originalname}` },
+            where: {
+              id: product_id.id
+            },
+            data: {
+              image_url: `${rootUrl}/static/${req.file.originalname}`
+            },
           });
         }
         res
           .status(200)
-          .json({ message: "Product has been updated", updated_product });
+          .json({
+            message: "Product has been updated",
+            updated_product
+          });
       }
     }
   }
@@ -150,20 +186,38 @@ router.delete(
   authorize(Permission.DELETE_PRODUCTS),
   async (req, res) => {
     if (isNaN(req.params.id)) {
-      res.status(400).json({ message: "Invalid ID" });
+      res.status(400).json({
+        message: "Invalid ID"
+      });
     } else {
       const product_id = await prisma.product.findFirst({
-        where: { id: Number(req.params.id) },
+        where: {
+          id: Number(req.params.id)
+        },
       });
       if (!product_id) {
-        res.status(404).json({ message: "Product Not Found" });
+        res.status(404).json({
+          message: "Product Not Found"
+        });
       } else {
         const product_id = await prisma.productImage.findFirst({
-          where: { product_id: Number(req.params.id) },
+          where: {
+            product_id: Number(req.params.id)
+          },
         });
-        await prisma.productImage.delete({ where: { id: product_id.id } });
-        await prisma.product.delete({ where: { id: Number(req.params.id) } });
-        res.status(200).json({ message: "Product has been deleted" });
+        await prisma.productImage.delete({
+          where: {
+            id: product_id.id
+          }
+        });
+        await prisma.product.delete({
+          where: {
+            id: Number(req.params.id)
+          }
+        });
+        res.status(200).json({
+          message: "Product has been deleted"
+        });
       }
     }
   }
