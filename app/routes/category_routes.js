@@ -1,6 +1,6 @@
 import prisma from "../helpers/prisma.js";
 import { Router } from "express";
-import { Permission } from "../middlewares/authorization.js";
+import { Permission } from "../constant/authorization.js";
 import authorize from "../middlewares/middleware.js";
 
 const router = Router();
