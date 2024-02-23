@@ -11,11 +11,11 @@ const validateProductReqBody = (req, res, next) => {
 };
 
 const validateCartReqBody = (req, res, next) => {
-  const { product_id, quantity } = req.body;
-  if (!product_id || !quantity) {
+  const { product_id, quantity,size_id } = req.body;
+  if (!product_id || !quantity||!size_id) {
     return res.status(400).json({ message: "All fields are required" });
   }
-  if (isNaN(product_id) || isNaN(quantity)) {
+  if (isNaN(product_id) || isNaN(quantity) || isNaN(size_id)) {
     return res.status(400).json({ message: "Invalid ID" });
   }
 

@@ -27,6 +27,7 @@ router.get("/product", async (req, res) => {
         select: {
           Size: {
             select: {
+              id: true,
               name: true,
             },
           },
@@ -58,6 +59,7 @@ router.get("/product/:id", async (req, res) => {
           select: {
             Size: {
               select: {
+                id: true,
                 name: true,
               }
             }
