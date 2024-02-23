@@ -30,7 +30,7 @@ const main = async () => {
             is_deleted: false,
             description: faker.commerce.productDescription(),
             category_id: 4,
-            rating: faker.number.float({ multipleOf: 0.25, min: 1, max: 5 }),
+            rating: faker.number.float({ multipleOf: 0.25, min: 3, max: 5 }),
           },
         });
 

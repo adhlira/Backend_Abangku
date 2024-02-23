@@ -15,25 +15,36 @@ router.post(
   validateCartReqBody,
   authorize(Permission.ADD_CARTS),
   async (req, res) => {
-    const { product_id, quantity } = req.body;
-    const product = await prisma.product.findFirst(product_id);
-    //console.log(req.user)
+    const { product_id, quantity, size_id } = req.body;
     const user_id = req.user.id;
+    // Check if product exists
+    const product = await prisma.product.findFirst(product_id);
+
+    // Check if product with that size is available
+    const size = await prisma.productSize.findFirst({ where: { product_id , size_id} });
+
+    if (!size) {
+      res.status(404).json({ message: "Size not found" });
+      return
+    }
 
     if (!product) {
       res.status(404).json({ message: "Product not found" });
+      return
     }
 
     // Check if product stock is available
     if (product.quantity < quantity) {
       res.status(400).json({ message: "Insufficient product stock" });
+      return
     }
 
-    // Find if product exist in the cart
+    // Find if product with that size is in the cart
     const existInCart = await prisma.cart.findFirst({
       where: {
         product_id,
         user_id,
+        size_id,
       },
     });
     // Update quantity if product exist
@@ -59,6 +70,7 @@ router.post(
             product_id,
             user_id,
             quantity,
+            size_id,
             total_price: quantity * product.price,
           },
         });
@@ -76,7 +88,26 @@ router.get(
   authorize(Permission.BROWSE_CARTS),
   async (req, res) => {
     const user_id = req.user.id;
-    const results = await prisma.cart.findMany({ where: { user_id: user_id } });
+    const results = await prisma.cart.findMany({
+      include: {
+        User: {
+          select: {
+            username: true,
+          },
+        },
+        Product: {
+          select: {
+            name: true,
+          },
+        },
+        Size: {
+          select: {
+            name: true,
+          }
+        }
+      },
+      where: { user_id: user_id },
+    });
     if (results.length === 0) {
       res.status(404).json({ message: "Cart is Empty" });
     }

@@ -31,7 +31,7 @@ const main = async () => {
             is_deleted: false,
             description: faker.commerce.productDescription(),
             category_id: 1,
-            rating: faker.number.float({ multipleOf: 0.25, min: 0, max: 5 }),
+            rating: faker.number.float({ multipleOf: 0.25, min: 3, max: 5 }),
           },
         });
         await tx.productImage.create({
