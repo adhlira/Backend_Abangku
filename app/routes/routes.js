@@ -15,8 +15,8 @@ router.use(userRouter);
 router.use(authRouter);
 router.use(categoryRouter);
 router.use(productRouter);
-router.use(cartRouter);
-router.use(orderRouter)
+router.use(cartRouter); 
+router.use(orderRouter);
 router.use(ongkirRouter);
 
 export default router;

@@ -1,32 +1,48 @@
-// app/routes/order_routes.js
 import express from 'express';
+import prisma from '../helpers/prisma.js';
 import { createOrder, getOrderById } from '../orderModel.js';
 import { createOrderItem } from '../orderItemModel.js';
 import { authorize } from '../constant/authorization.js';
+import authenticateToken from '../middlewares/authenticate_token.js';
 
 const router = express.Router();
 
-// Endpoint untuk membuat order baru
-// router.post('/orders', authorize('ADD_ORDERS'), async (req, res) => {
-router.post('/orders', async (req, res) => {
-
+router.post('/orders/from-cart', authenticateToken, async (req, res) => {
   try {
-    const orderData = req.body;
-    const newOrder = await createOrder(orderData);
+    const user_id = req.user.id;
 
-    // Jika berhasil membuat order, tambahkan order items
-    const orderItems = orderData.items;
-    if (orderItems && orderItems.length > 0) {
-      for (const item of orderItems) {
-        await createOrderItem({
-          order_id: newOrder.id,
-          product_id: item.product_id,
-          quantity: item.quantity,
-          price: item.price,
-          total_price: item.total_price,
-          shipment_fee: item.shipment_fee,
-        });
+    const cartItems = await prisma.cart.findMany({ where: { user_id: user_id } });
+
+    if (!cartItems || cartItems.length === 0) {
+      return res.status(400).json({ message: 'Cart is empty' });
+    }
+
+    let total = 0;
+    cartItems.forEach(item => {
+      if (item.product && item.product.price) {
+        total += item.product.price;
       }
+    });
+
+    const newOrder = await createOrder({
+      user_id: user_id,
+      status: 'WAITING_FOR_PAYMENT',
+      total: total
+    });
+
+    for (const item of cartItems) {
+      const price = item.product && item.product.price ? item.product.price : 0;
+
+      await createOrderItem({
+        order_id: newOrder.id,
+        product_id: item.product_id,
+        quantity: item.quantity,
+        price: price,
+        total_price: item.total_price,
+        shipment_fee: 0,
+      });
+
+      await prisma.cart.delete({ where: { id: item.id } });
     }
 
     res.status(201).json({ message: 'Order created successfully', order: newOrder });
@@ -35,9 +51,7 @@ router.post('/orders', async (req, res) => {
   }
 });
 
-// Endpoint untuk mendapatkan order berdasarkan ID
-// router.get('/orders/:id', authorize('READ_ORDERS'), async (req, res) => {
-router.get('/orders/:id', authorize('READ_ORDERS'), async (req, res) => {
+router.get('/orders/:id', authenticateToken, async (req, res) => {
   try {
     const orderId = parseInt(req.params.id);
     const order = await getOrderById(orderId);
