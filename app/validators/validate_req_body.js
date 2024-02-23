@@ -1,3 +1,4 @@
+// app/validators/validate_req_body.js
 import validator from "validator";
 
 const validateProductReqBody = (req, res, next) => {
