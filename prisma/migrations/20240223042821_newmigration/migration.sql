@@ -150,9 +150,9 @@ CREATE TABLE `product_images` (
 -- CreateTable
 CREATE TABLE `orders` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `user_id` INTEGER NOT NULL,
+    `user_id` INTEGER NULL,
     `invoice` VARCHAR(255) NOT NULL,
-    `payment_status` ENUM('PENDING', 'PAID', 'CANCELLED') NOT NULL DEFAULT 'PENDING',
+    `payment_status` ENUM('CREATED', 'PENDING', 'PAID', 'CANCELLED') NOT NULL DEFAULT 'CREATED',
     `total` DOUBLE NOT NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
@@ -179,6 +179,7 @@ CREATE TABLE `order_items` (
 CREATE TABLE `carts` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `user_id` INTEGER NOT NULL,
+    `size_id` INTEGER NOT NULL,
     `product_id` INTEGER NOT NULL,
     `quantity` INTEGER NOT NULL,
     `total_price` DOUBLE NOT NULL,
@@ -237,7 +238,7 @@ ALTER TABLE `color_product` ADD CONSTRAINT `color_product_color_id_fkey` FOREIGN
 ALTER TABLE `product_images` ADD CONSTRAINT `product_images_product_id_fkey` FOREIGN KEY (`product_id`) REFERENCES `products`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `orders` ADD CONSTRAINT `orders_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `orders` ADD CONSTRAINT `orders_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `order_items` ADD CONSTRAINT `order_items_product_id_fkey` FOREIGN KEY (`product_id`) REFERENCES `products`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -250,3 +251,6 @@ ALTER TABLE `carts` ADD CONSTRAINT `carts_user_id_fkey` FOREIGN KEY (`user_id`) 
 
 -- AddForeignKey
 ALTER TABLE `carts` ADD CONSTRAINT `carts_product_id_fkey` FOREIGN KEY (`product_id`) REFERENCES `products`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `carts` ADD CONSTRAINT `carts_size_id_fkey` FOREIGN KEY (`size_id`) REFERENCES `sizes`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
