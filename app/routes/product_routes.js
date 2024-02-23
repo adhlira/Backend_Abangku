@@ -49,6 +49,11 @@ router.get("/product/:id", async (req, res) => {
             image_url: true,
           },
         },
+        Category: {
+          select: {
+            name: true,
+          }
+        },
         ProductSize: {
           select: {
             Size: {
