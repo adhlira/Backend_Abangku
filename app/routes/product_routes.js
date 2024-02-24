@@ -79,13 +79,12 @@ router.get("/product/:id", async (req, res) => {
 
 router.post(
   "/product",
-  authenticateToken,
-  authorize(Permission.ADD_PRODUCTS),
   uploadMiddleware,
   validateProductReqBody,
   async (req, res) => {
-    const { name, description, price, category_id, quantity, rating } =
+    const { name, description, price, category_id, quantity, rating, size } =
       req.body;
+      
     const rootUrl = `${req.protocol}://${req.get("host")}`;
     //   console.log(req.body);
     try {
@@ -98,6 +97,11 @@ router.post(
             category_id: +category_id,
             quantity: +quantity,
             rating: +rating,
+            ProductSize: {
+              create: JSON.parse(size).map((size) => ({
+                size_id: +size,
+              })),
+            },
           },
         });
         if (req.files && req.files.length > 0) {
