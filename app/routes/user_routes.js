@@ -2,24 +2,11 @@ import { Router } from "express";
 import prisma from "../helpers/prisma.js";
 import validateRegister from "../validators/validate_register.js";
 import bcrypt from "bcrypt";
+import authenticateToken from "../middlewares/authenticate_token.js";
+import authorize from "../middlewares/middleware.js";
+import { Permission } from "../constant/authorization.js";
 
 const router = Router();
-
-router.get("/users", async (req, res) => {
-  const { email } = req.query;
-  try {
-    const users = await prisma.user.findMany({
-      where: {
-        email: {
-          contains: email,
-        },
-      },
-    });
-    res.status(200).json(users);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
 
 router.post("/register", validateRegister, async (req, res) => {
   const { username, email, password, phone, fullname } = req.body;
@@ -69,62 +56,38 @@ router.post("/register", validateRegister, async (req, res) => {
         membership_id: 1,
       },
     });
-    res
-      .status(200)
-      .json({ message: "User created successfully", data: result });
+    res.status(200).json({ message: "User created successfully", data: result });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-router.put("/user/:id", async (req, res) => {
-  const {
-    username,
-    email,
-    password,
-    phone,
-    fullname,
-    address,
-    lat,
-    long,
-    membership_id,
-    gender,
-  } = req.body;
+router.get("/user/:id", authenticateToken, authorize(Permission.READ_USERS), async (req, res) => {
+  const user_id = req.user.id;
+
   if (isNaN(req.params.id)) {
     res.status(400).json({ message: "Invalid ID" });
+  } else {
+    const user = await prisma.user.findFirst({ where: { id: user_id } });
+    if (user_id != Number(req.params.id)) {
+      res.status(401).json({ message: "UnAuthorized" });
+    } else {
+      res.status(200).json(user);
+    }
   }
-  // check if user exists
-  const user = await prisma.user.findUnique({
-    where: {
-      id: +req.params.id,
-    },
-  });
-  if (!user) {
-    return res.status(404).json({ message: "User not found" });
-  }
-  try {
-    const result = await prisma.user.update({
-      where: {
-        id: +req.params.id,
-      },
-      data: {
-        username: username,
-        fullname: fullname,
-        email: email.toLowerCase(),
-        password: bcrypt.hashSync(`${password}`, +process.env.BCRYPT_ROUNDS),
-        phone: phone,
-        address: address ? address : user.address || null,
-        lat: lat ? lat : user.lat || null,
-        long: long ? long : user.long || null,
-        membership_id: membership_id ? membership_id : user.membership_id,
-        gender: gender ? gender : user.gender || null,
-      },
-    });
-    res
-      .status(200)
-      .json({ message: "User updated successfully", data: result });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+});
+
+router.put("/user/:id", authenticateToken, authorize(Permission.EDIT_USERS), async (req, res) => {
+  const user_id = req.user.id;
+  if (isNaN(req.params.id)) {
+    res.status(400).json({ message: "Invalid ID" });
+  } else {
+    if (Number(req.params.id) != user_id) {
+      res.status(401).json({ message: "UnAuthorized" });
+    } else {
+      const user_updated = await prisma.user.update({ where: { id: user_id }, data: req.body });
+      res.json(user_updated);
+    }
   }
 });
 
