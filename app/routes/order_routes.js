@@ -26,6 +26,16 @@ router.post("/checkout", authenticateToken, async (req, res) => {
       return res.status(400).json({ message: "Cart is empty" });
     }
 
+    // Double check to make sure product stock is sufficient
+    for (const item of cartItems) {
+      const product = await prisma.product.findFirst({
+        where: { id: item.product_id },
+      });
+      if (product.quantity < item.quantity) {
+        return res.status(400).json({ message: "One of the items is out of stock", product: product , required: item.quantity, available: product.quantity});
+      }
+    }
+
     let total = 0;
     cartItems.forEach((item) => {
       total += item.total_price;
@@ -54,7 +64,7 @@ router.post("/checkout", authenticateToken, async (req, res) => {
     );
 
     console.log(shipmentFee.status);
-    let fee
+    let fee = 0;
     if (shipmentFee.status === 200) {
       console.log(
         shipmentFee.data.rajaongkir.results[0].costs[0].cost[0].value
@@ -77,6 +87,27 @@ router.post("/checkout", authenticateToken, async (req, res) => {
 
       await prisma.cart.delete({ where: { id: item.id } });
     }
+
+    // accumulate fee
+    const cartItemsFee = await prisma.orderItem.findMany({
+      where: {
+        order_id: newOrder.id,
+      },
+    });
+
+    const totalFee = cartItemsFee.reduce((acc, item) => {
+      return acc + item.shipment_fee;
+    });
+
+    // upddate order total
+    await prisma.order.update({
+      where: {
+        id: newOrder.id,
+      },
+      data: {
+        total: total + totalFee,
+      },
+    });
 
     res
       .status(201)

@@ -6,8 +6,15 @@ import bcrypt from "bcrypt";
 const router = Router();
 
 router.get("/users", async (req, res) => {
+  const { email } = req.query;
   try {
-    const users = await prisma.user.findMany();
+    const users = await prisma.user.findMany({
+      where: {
+        email: {
+          contains: email,
+        },
+      },
+    });
     res.status(200).json(users);
   } catch (err) {
     res.status(500).json({ error: err.message });
