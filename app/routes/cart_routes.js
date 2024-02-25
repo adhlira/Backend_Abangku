@@ -21,22 +21,24 @@ router.post(
     const product = await prisma.product.findFirst(product_id);
 
     // Check if product with that size is available
-    const size = await prisma.productSize.findFirst({ where: { product_id , size_id} });
+    const size = await prisma.productSize.findFirst({
+      where: { product_id, size_id },
+    });
 
     if (!size) {
       res.status(404).json({ message: "Size not found" });
-      return
+      return;
     }
 
     if (!product) {
       res.status(404).json({ message: "Product not found" });
-      return
+      return;
     }
 
     // Check if product stock is available
     if (product.quantity < quantity) {
       res.status(400).json({ message: "Insufficient product stock" });
-      return
+      return;
     }
 
     // Find if product with that size is in the cart
@@ -105,18 +107,17 @@ router.get(
         Size: {
           select: {
             name: true,
-          }
-        }
+          },
+        },
       },
       where: { user_id: user_id },
     });
     if (results.length === 0) {
-      res.status(404).json({ message: "Cart is Empty" });
+      return res.status(404).json({ message: "Cart is Empty" });
     }
     res.status(200).json(results);
   }
 );
-
 
 router.put(
   "/cart/:id",
