@@ -41,12 +41,11 @@ router.get("/category/:id", async (req, res) => {
   const category_id = +req.params.id;
   const category = await prisma.category.findFirst({
     where: { id: category_id },
-  })
-  if(!category) {
+  });
+  if (!category) {
     res.status(404).json({ message: "Category not found" });
   } else {
     res.status(200).json(category);
-
   }
 });
 
@@ -80,7 +79,9 @@ router.delete("/category/:id", async (req, res) => {
   if (isNaN(req.params.id)) {
     res.status(400).json({ message: "Invalid ID" });
   } else {
-    const category_id = await prisma.category.findFirst({ where: { id: Number(req.params.id) } });
+    const category_id = await prisma.category.findFirst({
+      where: { id: Number(req.params.id) },
+    });
     if (!category_id) {
       res.status(404).json({ message: "Category not found" });
     } else {
@@ -97,5 +98,6 @@ router.delete("/category/:id", async (req, res) => {
       }
     }
   }
-);
+});
+
 export default router;
