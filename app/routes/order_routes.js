@@ -47,7 +47,7 @@ router.post("/checkout", authenticateToken, async (req, res) => {
     cartItems.forEach((item) => {
       totalPrice += item.total_price;
       totalWeight += item.total_weight;
-    });    
+    });
 
     console.log(totalPrice, totalWeight);
 
@@ -57,7 +57,6 @@ router.post("/checkout", authenticateToken, async (req, res) => {
       total: totalPrice,
       shipment_fee: 0,
     });
-    
 
     // Get shipment fee
     const shipmentFee = await axios.post(
@@ -87,9 +86,9 @@ router.post("/checkout", authenticateToken, async (req, res) => {
     for (const item of cartItems) {
       const product = await prisma.product.findFirst({
         where: { id: item.product_id },
-      })
+      });
 
-      console.log(item)
+      console.log(item);
 
       await createOrderItem({
         order_id: newOrder.id,
@@ -112,8 +111,8 @@ router.post("/checkout", authenticateToken, async (req, res) => {
       },
       data: {
         shipment_fee: fee,
-      }
-    })
+      },
+    });
 
     //get updated order
     const updatedOrder = await getOrderById(newOrder.id);
@@ -129,7 +128,7 @@ router.post("/checkout", authenticateToken, async (req, res) => {
 router.get(
   "/orders",
   authenticateToken,
-  authorize(Permission.BROWSE_ORDERS),
+  authorize(Permission.READ_ORDERS),
   async (req, res) => {
     try {
       const results = await prisma.order.findMany({
