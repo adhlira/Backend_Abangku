@@ -27,6 +27,8 @@ const main = async () => {
                 +faker.commerce.price({ min: 1000000, max: 2000000 }) / 1000
               ) * 1000,
             quantity: faker.number.int({ min: 10, max: 100 }),
+            weight:
+              Math.round(+faker.number.int({ min: 360, max: 2000 }) / 100) * 100,
             is_deleted: false,
             description: faker.commerce.productDescription(),
             category_id: 4,

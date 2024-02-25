@@ -32,20 +32,32 @@ router.post("/checkout", authenticateToken, async (req, res) => {
         where: { id: item.product_id },
       });
       if (product.quantity < item.quantity) {
-        return res.status(400).json({ message: "One of the items is out of stock", product: product , required: item.quantity, available: product.quantity});
+        return res.status(400).json({
+          message: "One of the items is out of stock",
+          product: product,
+          required: item.quantity,
+          available: product.quantity,
+        });
       }
     }
 
-    let total = 0;
+    // Calculate total price and weight
+    let totalPrice = 0;
+    let totalWeight = 0;
     cartItems.forEach((item) => {
-      total += item.total_price;
-    });
+      totalPrice += item.total_price;
+      totalWeight += item.total_weight;
+    });    
+
+    console.log(totalPrice, totalWeight);
 
     const newOrder = await createOrder({
       user_id: user_id,
       status: "CREATED",
-      total: total,
+      total: totalPrice,
+      shipment_fee: 0,
     });
+    
 
     // Get shipment fee
     const shipmentFee = await axios.post(
@@ -53,7 +65,7 @@ router.post("/checkout", authenticateToken, async (req, res) => {
       {
         origin,
         destination,
-        weight: 1000,
+        weight: totalWeight,
         courier,
       },
       {
@@ -66,52 +78,49 @@ router.post("/checkout", authenticateToken, async (req, res) => {
     console.log(shipmentFee.status);
     let fee = 0;
     if (shipmentFee.status === 200) {
-      console.log(
-        shipmentFee.data.rajaongkir.results[0].costs[0].cost[0].value
-      );
+      // console.log(
+      //   shipmentFee.data.rajaongkir.results[0].costs[0].cost[0].value
+      // );
       fee = shipmentFee.data.rajaongkir.results[0].costs[0].cost[0].value;
     }
 
     for (const item of cartItems) {
-      const price = item.product && item.product.price ? item.product.price : 0;
+      const product = await prisma.product.findFirst({
+        where: { id: item.product_id },
+      })
+
+      console.log(item)
 
       await createOrderItem({
         order_id: newOrder.id,
         product_id: item.product_id,
         size_id: item.size_id,
         quantity: item.quantity,
-        price: price,
+        price: product.price,
+        weight: product.weight,
         total_price: item.total_price,
-        shipment_fee: fee,
+        total_weight: item.total_weight,
       });
 
       await prisma.cart.delete({ where: { id: item.id } });
     }
 
-    // accumulate fee
-    const cartItemsFee = await prisma.orderItem.findMany({
-      where: {
-        order_id: newOrder.id,
-      },
-    });
-
-    const totalFee = cartItemsFee.reduce((acc, item) => {
-      return acc + item.shipment_fee;
-    });
-
-    // upddate order total
+    // Update order shipment fee
     await prisma.order.update({
       where: {
         id: newOrder.id,
       },
       data: {
-        total: total + totalFee,
-      },
-    });
+        shipment_fee: fee,
+      }
+    })
+
+    //get updated order
+    const updatedOrder = await getOrderById(newOrder.id);
 
     res
       .status(201)
-      .json({ message: "Order created successfully", order: newOrder });
+      .json({ message: "Order created successfully", order: updatedOrder });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

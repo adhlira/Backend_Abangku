@@ -47,7 +47,7 @@ router.post(
         size_id,
       },
     });
-    // Update quantity if product exist
+    // Update quantity and weight if product exist
     if (existInCart) {
       try {
         await prisma.cart.update({
@@ -57,6 +57,7 @@ router.post(
           data: {
             quantity: existInCart.quantity + quantity,
             total_price: (existInCart.quantity + quantity) * product.price,
+            total_weight: (existInCart.quantity + quantity) * product.weight,
           },
         });
         return res.status(200).json({ message: "Cart Updated" });
@@ -72,6 +73,7 @@ router.post(
             quantity,
             size_id,
             total_price: quantity * product.price,
+            total_weight: quantity * product.weight,
           },
         });
         return res.status(200).json({ message: "Product added to cart" });

@@ -95,6 +95,7 @@ model Product {
   price    Float
   quantity Int
   rating   Float
+  weight   Float
 
   is_deleted  Boolean  @default(false)
   description String?  @db.Text
@@ -201,6 +202,7 @@ model Order {
   payment_url    String?  @unique
   transaction_id String?  @unique
   total          Float
+  shipment_fee   Float
   created_at     DateTime @default(now())
   updated_at     DateTime @updatedAt
 
@@ -216,10 +218,12 @@ model OrderItem {
   size_id      Int
   quantity     Int
   price        Float
+  weight       Float
+  total_weight Float
   total_price  Float
-  shipment_fee Float
-  created_at   DateTime @default(now())
-  updated_at   DateTime @updatedAt
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
   Product Product @relation(fields: [product_id], references: [id])
   Order   Order   @relation(fields: [order_id], references: [id])
@@ -235,6 +239,7 @@ model Cart {
   size_id     Int
   product_id  Int
   quantity    Int
+  total_weight Float
   total_price Float
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
