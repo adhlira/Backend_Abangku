@@ -102,6 +102,12 @@ router.get(
         Product: {
           select: {
             name: true,
+            price: true,
+            ProductImage: {
+              select: {
+                image_url: true,
+              }
+            }
           },
         },
         Size: {
