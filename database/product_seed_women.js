@@ -26,15 +26,17 @@ const main = async () => {
             name: womenClothingNames[i],
             price:
               Math.floor(
-                +faker.commerce.price({ min: 200000, max:5400000 }) / 1000
+                +faker.commerce.price({ min: 200000, max: 540000 }) / 1000
               ) * 1000,
             quantity: faker.number.int({ min: 10, max: 100 }),
+            weight:
+              (Math.round(+faker.number.int({ min: 90, max: 500 }) / 100) * 100) +90,
             is_deleted: false,
             description: faker.commerce.productDescription(),
             category_id: 2,
             rating: faker.number.float({ multipleOf: 0.25, min: 3, max: 5 }),
           },
-        });  
+        });
 
         await tx.productImage.create({
           data: {

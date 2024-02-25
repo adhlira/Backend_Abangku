@@ -75,6 +75,7 @@ CREATE TABLE `products` (
     `price` DOUBLE NOT NULL,
     `quantity` INTEGER NOT NULL,
     `rating` DOUBLE NOT NULL,
+    `weight` DOUBLE NOT NULL,
     `is_deleted` BOOLEAN NOT NULL DEFAULT false,
     `description` TEXT NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -153,11 +154,15 @@ CREATE TABLE `orders` (
     `user_id` INTEGER NULL,
     `invoice` VARCHAR(255) NOT NULL,
     `payment_status` ENUM('CREATED', 'PENDING', 'PAID', 'CANCELLED') NOT NULL DEFAULT 'CREATED',
+    `payment_url` VARCHAR(191) NULL,
+    `transaction_id` VARCHAR(191) NULL,
     `total` DOUBLE NOT NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
 
     UNIQUE INDEX `orders_invoice_key`(`invoice`),
+    UNIQUE INDEX `orders_payment_url_key`(`payment_url`),
+    UNIQUE INDEX `orders_transaction_id_key`(`transaction_id`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 

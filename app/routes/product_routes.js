@@ -82,9 +82,17 @@ router.post(
   uploadMiddleware,
   validateProductReqBody,
   async (req, res) => {
-    const { name, description, price, category_id, quantity, rating, size } =
-      req.body;
-      
+    const {
+      name,
+      description,
+      price,
+      category_id,
+      quantity,
+      rating,
+      size,
+      weight,
+    } = req.body;
+
     const rootUrl = `${req.protocol}://${req.get("host")}`;
     //   console.log(req.body);
     try {
@@ -97,6 +105,7 @@ router.post(
             category_id: +category_id,
             quantity: +quantity,
             rating: +rating,
+            weight: +weight,
             ProductSize: {
               create: JSON.parse(size).map((size) => ({
                 size_id: +size,
@@ -177,7 +186,16 @@ router.put(
           message: "Product Not Found",
         });
       } else {
-        const { name, price, quantity, description, rating } = req.body;
+        const {
+          name,
+          description,
+          price,
+          category_id,
+          quantity,
+          rating,
+          size,
+          weight,
+        } = req.body;
 
         // Fetch old image URLs
         const oldImages = await prisma.productImage.findMany({
@@ -196,6 +214,15 @@ router.put(
             quantity: +quantity,
             description,
             rating: +rating,
+            weight: +weight,
+            ProductSize: {
+              deleteMany: {
+                product_id: Number(req.params.id),
+              },
+              create: JSON.parse(size).map((size) => ({
+                size_id: +size,
+              })),
+            },
           },
         });
 
