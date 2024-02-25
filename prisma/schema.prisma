@@ -150,6 +150,7 @@ model Size {
 
   ProductSize ProductSize[]
   Cart        Cart[]
+  OrderItem   OrderItem[]
 
   @@map("sizes")
 }
@@ -193,13 +194,15 @@ enum Status {
 }
 
 model Order {
-  id         Int      @id @default(autoincrement())
-  user_id    Int?
-  invoice    String   @unique @db.VarChar(255)
-  status     Status   @default(CREATED) @map("payment_status")
-  total      Float
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  id             Int      @id @default(autoincrement())
+  user_id        Int?
+  invoice        String   @unique @db.VarChar(255)
+  status         Status   @default(CREATED) @map("payment_status")
+  payment_url    String?  @unique
+  transaction_id String?  @unique
+  total          Float
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
 
   Order_Items OrderItem[]
   User        User?       @relation(fields: [user_id], references: [id])
@@ -210,6 +213,7 @@ model Order {
 model OrderItem {
   order_id     Int
   product_id   Int
+  size_id      Int
   quantity     Int
   price        Float
   total_price  Float
@@ -219,8 +223,9 @@ model OrderItem {
 
   Product Product @relation(fields: [product_id], references: [id])
   Order   Order   @relation(fields: [order_id], references: [id])
+  Size    Size    @relation(fields: [size_id], references: [id])
 
-  @@id([order_id, product_id])
+  @@id([order_id, product_id, size_id])
   @@map("order_items")
 }
 

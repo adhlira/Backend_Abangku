@@ -24,7 +24,7 @@ const main = async () => {
             name: familyMatchingClothingNames[i],
             price:
               Math.floor(
-                +faker.commerce.price({ min: 300000, max: 700000 }) / 1000
+                +faker.commerce.price({ min: 1000000, max: 2000000 }) / 1000
               ) * 1000,
             quantity: faker.number.int({ min: 10, max: 100 }),
             is_deleted: false,

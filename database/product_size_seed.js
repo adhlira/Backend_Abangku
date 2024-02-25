@@ -3,7 +3,13 @@ import prisma from "../app/helpers/prisma.js";
 async function insertRandomProductSizes() {
   try {
     // Fetch all products and sizes
-    const products = await prisma.product.findMany();
+    const products = await prisma.product.findMany({
+      where: {
+        NOT: {
+          category_id: 4,
+        },
+      },
+    });
     const sizes = await prisma.size.findMany();
 
     // Check if there are no products or sizes in the database

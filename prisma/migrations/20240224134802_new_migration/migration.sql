@@ -165,6 +165,7 @@ CREATE TABLE `orders` (
 CREATE TABLE `order_items` (
     `order_id` INTEGER NOT NULL,
     `product_id` INTEGER NOT NULL,
+    `size_id` INTEGER NOT NULL,
     `quantity` INTEGER NOT NULL,
     `price` DOUBLE NOT NULL,
     `total_price` DOUBLE NOT NULL,
@@ -172,7 +173,7 @@ CREATE TABLE `order_items` (
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
 
-    PRIMARY KEY (`order_id`, `product_id`)
+    PRIMARY KEY (`order_id`, `product_id`, `size_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
@@ -245,6 +246,9 @@ ALTER TABLE `order_items` ADD CONSTRAINT `order_items_product_id_fkey` FOREIGN K
 
 -- AddForeignKey
 ALTER TABLE `order_items` ADD CONSTRAINT `order_items_order_id_fkey` FOREIGN KEY (`order_id`) REFERENCES `orders`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `order_items` ADD CONSTRAINT `order_items_size_id_fkey` FOREIGN KEY (`size_id`) REFERENCES `sizes`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `carts` ADD CONSTRAINT `carts_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

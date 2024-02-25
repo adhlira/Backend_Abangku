@@ -10,6 +10,10 @@ export default async function authenticateToken(req, res, next) {
     if (!token) return res.sendStatus(401);
 
     const decoded = Jwt.verify(token, process.env.JWT_SECRET);
+    if (decoded.special) {
+      req.special = decoded.special;
+      return next();
+    }
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },
     });
@@ -18,7 +22,10 @@ export default async function authenticateToken(req, res, next) {
     req.user = user;
     next();
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: "Internal Server Error" });
+    if (err.name === "TokenExpiredError") {
+      res.status(401).json({ message: "JWT Token expired" });
+    } else {
+      res.status(500).json({ error: err.message });
+    }
   }
 }

@@ -8,6 +8,7 @@ export const createOrderItem = async (data) => {
       data: {
         order_id: data.order_id,
         product_id: data.product_id,
+        size_id: data.size_id,
         quantity: data.quantity,
         price: data.price,
         total_price: data.total_price,

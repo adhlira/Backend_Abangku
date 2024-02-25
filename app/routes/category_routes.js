@@ -11,12 +11,16 @@ router.post("/category", async (req, res) => {
   if (!req.body.name) {
     res.status(400).json({ message: "Name is required" });
   } else {
-    const name_exist = await prisma.category.findFirst({ where: { name: req.body.name } });
+    const name_exist = await prisma.category.findFirst({
+      where: { name: req.body.name },
+    });
     if (name_exist) {
       res.status(400).json({ message: "Name is already" });
     } else {
       const category = await prisma.category.create({ data: name });
-      res.status(200).json({ message: "Category created successfully", category });
+      res
+        .status(200)
+        .json({ message: "Category created successfully", category });
     }
   }
 });
@@ -32,14 +36,17 @@ router.get("/category", async (req, res) => {
 
 router.get("/category/:id", async (req, res) => {
   if (isNaN(req.params.id)) {
-    res.status(400).json({ message: "Invalid ID" });
+    return res.status(400).json({ message: "Invalid ID" });
+  }
+  const category_id = +req.params.id;
+  const category = await prisma.category.findFirst({
+    where: { id: category_id },
+  })
+  if(!category) {
+    res.status(404).json({ message: "Category not found" });
   } else {
-    const category = await prisma.category.findFirst({ where: { id: Number(req.params.id) } });
-    if (!category) {
-      res.status(404).json({ message: "Category Not Found" });
-    } else {
-      res.json(category);
-    }
+    res.status(200).json(category);
+
   }
 });
 
@@ -47,11 +54,15 @@ router.put("/category/:id", async (req, res) => {
   if (isNaN(req.params.id)) {
     res.status(400).json({ message: "Invalid ID" });
   } else {
-    const category_id = await prisma.category.findFirst({ where: { id: Number(req.params.id) } });
+    const category_id = await prisma.category.findFirst({
+      where: { id: Number(req.params.id) },
+    });
     if (!category_id) {
       res.status(404).json({ message: "Category not found" });
     } else {
-      const category_exist = await prisma.category.findFirst({ where: { name: req.body.name } });
+      const category_exist = await prisma.category.findFirst({
+        where: { name: req.body.name },
+      });
       if (category_exist) {
         res.status(400).json({ message: "Category Name is already" });
       } else {
@@ -73,11 +84,18 @@ router.delete("/category/:id", async (req, res) => {
     if (!category_id) {
       res.status(404).json({ message: "Category not found" });
     } else {
-      await prisma.category.delete({
+      const category_id = await prisma.category.findFirst({
         where: { id: Number(req.params.id) },
       });
-      res.json({ message: "Category has been deleted" });
+      if (!category_id) {
+        res.status(404).json({ message: "Category not found" });
+      } else {
+        await prisma.category.delete({
+          where: { id: Number(req.params.id) },
+        });
+        res.json({ message: "Category has been deleted" });
+      }
     }
   }
-});
+);
 export default router;
