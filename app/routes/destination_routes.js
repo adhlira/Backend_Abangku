@@ -2,19 +2,21 @@ import { Router } from "express";
 import prisma from "../helpers/prisma.js";
 import authenticateToken from "../middlewares/authenticate_token.js";
 import dotenv from "dotenv";
-import axios from 'axios';
-
+import axios from "axios";
 
 dotenv.config();
 const router = Router();
 
 router.get("/provinces", async (req, res) => {
   try {
-    const province = await axios.get("https://api.rajaongkir.com/starter/province", {
-      headers: {
-        key: process.env.RAJAONGKIR_API_KEY,
-      },
-    });
+    const province = await axios.get(
+      "https://api.rajaongkir.com/starter/province",
+      {
+        headers: {
+          key: process.env.RAJAONGKIR_API_KEY,
+        },
+      }
+    );
 
     if (province.status === 200) {
       res.status(200).json(province.data.rajaongkir.results);
@@ -26,17 +28,20 @@ router.get("/provinces", async (req, res) => {
   }
 });
 
-router.post("/cities", async (req, res) => {
-  const { province_id } = req.body;
+router.get("/cities/:id", async (req, res) => {
+  const province_id = +req.params.id;
   try {
-    const province = await axios.get("https://api.rajaongkir.com/starter/city", {
-      params: {
-        province: province_id,
-      },
-      headers: {
-        key: process.env.RAJAONGKIR_API_KEY,
-      },
-    });
+    const province = await axios.get(
+      "https://api.rajaongkir.com/starter/city",
+      {
+        params: {
+          province: province_id,
+        },
+        headers: {
+          key: process.env.RAJAONGKIR_API_KEY,
+        },
+      }
+    );
     if (province.status === 200) {
       res.status(200).json(province.data.rajaongkir.results);
     } else {
