@@ -138,6 +138,11 @@ router.put("/cart/:id", authenticateToken, authorize(Permission.EDIT_CARTS), asy
           where: { id: size.id },
           data: { quantity: quantity + size.quantity, total_price: quantity * product.price + size.total_price, size_id: +size_id },
         });
+        // check if it's the same cart
+        if(size_updated.id === Number(req.params.id)) {
+          res.status(200).json({ message: "Cart updated", size_updated });
+          return;
+        }
         await prisma.cart.delete({ where: { id: Number(req.params.id) } });
         res.status(200).json({ message: "Cart updated", size_updated });
       } else {
