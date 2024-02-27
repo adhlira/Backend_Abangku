@@ -12,6 +12,7 @@ const myCache = new NodeCache({ stdTTL: 600, checkperiod: 30000 });
 router.get("/provinces", async (req, res) => {
   try {
     const cachedProvinces = myCache.get("provinces");
+    console.log("using cache")
     if (cachedProvinces) {
       res.status(200).json(cachedProvinces);
       return;
