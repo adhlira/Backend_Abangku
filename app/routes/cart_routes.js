@@ -131,26 +131,31 @@ router.put("/cart/:id", authenticateToken, authorize(Permission.EDIT_CARTS), asy
     if (!cart_id) {
       res.status(404).json({ message: "Card ID Not Found" });
     } else {
-      const size = await prisma.cart.findFirst({ where: { user_id: +user_id, product_id: +product_id, size_id: +size_id } });
-      console.log(size);
-      if (size) {
-        const size_updated = await prisma.cart.update({
-          where: { id: size.id },
-          data: { quantity: quantity + size.quantity, total_price: quantity * product.price + size.total_price, size_id: +size_id },
-        });
-        // check if it's the same cart
-        if(size_updated.id === Number(req.params.id)) {
-          res.status(200).json({ message: "Cart updated", size_updated });
-          return;
+      const updated_quantity = await prisma.cart.findFirst({ where: { id:Number(req.params.id), product_id: +product_id, size_id: +size_id } });
+      
+      if(updated_quantity){
+        const quantity_updated = await prisma.cart.update({
+          where: { id: updated_quantity.id },
+          data: { quantity, total_price: quantity * product.price , size_id: +size_id },
+        })
+      }
+      else {
+        
+        const size = await prisma.cart.findFirst({ where: { user_id: +user_id, product_id: +product_id, size_id: +size_id } });
+        console.log(size);
+        if (size) {
+          const size_updated = await prisma.cart.update({
+            where: { id: size.id },
+            data: { quantity: quantity + size.quantity, total_price: quantity * product.price + size.total_price, size_id: +size_id },
+          });
+          await prisma.cart.delete({ where: { id: Number(req.params.id) } });
+        } else {
+          const cart_updated = await prisma.cart.update({
+            where: { id: Number(req.params.id) },
+            data: { quantity, total_price: quantity * product.price, size_id: +size_id },
+          });
+          res.status(200).json({ message: "Cart updated", cart_updated });
         }
-        await prisma.cart.delete({ where: { id: Number(req.params.id) } });
-        res.status(200).json({ message: "Cart updated", size_updated });
-      } else {
-        const cart_updated = await prisma.cart.update({
-          where: { id: Number(req.params.id) },
-          data: { quantity, total_price: quantity * product.price, size_id: +size_id },
-        });
-        res.status(200).json({ message: "Cart updated", cart_updated });
       }
     }
   }
