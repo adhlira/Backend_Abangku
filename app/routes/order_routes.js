@@ -75,6 +75,7 @@ router.post("/checkout", authenticateToken, async (req, res) => {
     );
 
     console.log(shipmentFee.status);
+    console.log("here");
     let fee = 0;
     if (shipmentFee.status === 200) {
       // console.log(

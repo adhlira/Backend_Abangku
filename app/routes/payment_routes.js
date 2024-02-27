@@ -9,68 +9,75 @@ const router = Router();
 
 router.post("/webhooks/payment", async (req, res) => {
   console.log(req.body);
-  const { order_id, transaction_id, transaction_status } = req.body;
+  try {
+    const { order_id, transaction_id, transaction_status } = req.body;
 
-  // find order with order_id
-  const order = await prisma.order.findUniqueOrThrow({
-    where: {
-      invoice: order_id,
-    },
-  });
+    // find order with order_id
+    const order = await prisma.order.findUniqueOrThrow({
+      where: {
+        invoice: order_id,
+      },
+    });
 
-  if (!order) {
-    return res.status(404).json({ message: "Order not found" });
-  }
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
 
-  if (transaction_status === "settlement") {
-    await prisma.$transaction(async (tx) => {
-      await tx.order.update({
+    if (transaction_status === "settlement") {
+      await prisma.$transaction(async (tx) => {
+        await tx.order.update({
+          where: {
+            id: order.id,
+          },
+          data: {
+            transaction_id,
+            status: "PAID",
+          },
+        });
+        // Fetch all order items associated with the order
+        const orderItems = await tx.orderItem.findMany({
+          where: {
+            order_id: order.id,
+          },
+          select: {
+            Product: {
+              select: {
+                id: true,
+                quantity: true,
+              },
+            },
+            quantity: true,
+          },
+        });
+        // console.log(orderItems);
+        // // deduct the stock
+        for (const orderItem of orderItems) {
+          const { Product, quantity } = orderItem;
+          const updatedStock = Product.quantity - quantity;
+          await tx.product.update({
+            where: {
+              id: Product.id,
+            },
+            data: {
+              quantity: updatedStock,
+            },
+          });
+        }
+      });
+    } else if (transaction_status === "pending") {
+      await prisma.order.update({
         where: {
           id: order.id,
         },
         data: {
           transaction_id,
-          status: "PAID",
+          status: "PENDING",
         },
       });
-    });
-  } else if (transaction_status === "pending") {
-    await prisma.order.update({
-      where: {
-        id: order.id,
-      },
-      data: {
-        transaction_id,
-        status: "PENDING",
-      },
-    });
-  }
-  res.status(200).json({ status: "success", data: req.body });
-});
-
-router.get("/payments", authenticateToken, async (req, res) => {
-  try {
-    const pay = await axios.post(
-      "https://app.sandbox.midtrans.com/snap/v1/transactions",
-      {
-        transaction_details: {
-          order_id: "your order test 9999",
-          gross_amount: 5000,
-        },
-      },
-      {
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          Authorization: `Basic ${process.env.MIDTRANS_API_KEY}`,
-        },
-      }
-    );
-    return res
-      .status(200)
-      .json({ message: "Payment Successful", data: pay.data });
+    }
+    res.status(200).json({ status: "success", data: req.body });
   } catch (error) {
-    res.status(500).json({ error: error.message, message: "midtrans errors" });
+    res.status(500).json({ error: error.message });
   }
 });
 
