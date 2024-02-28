@@ -338,26 +338,31 @@ router.delete(
         });
       }
 
-      const productImg =  await prisma.productImage.findMany({
+      const productImg = await prisma.productImage.findMany({
         where: {
           product_id: productID,
-        }
-      })
+        },
+      });
       const productCart = await prisma.cart.findMany({
         where: {
           product_id: productID,
-        }
-      })
+        },
+      });
       const productSizes = await prisma.productSize.findMany({
         where: {
           product_id: productID,
-        }
-      })
+        },
+      });
+      const productOrderItems = await prisma.orderItem.findMany({
+        where: {
+          product_id: productID,
+        },
+      });
 
       // deleting product
       // Starting transaction to delete item
-      let deleteTransaction = false
-       await prisma.$transaction(async (tx) => {
+      let deleteTransaction = false;
+      await prisma.$transaction(async (tx) => {
         // unlink image
         if (productImg) {
           const oldImages = await tx.productImage.findMany({
@@ -365,7 +370,7 @@ router.delete(
               product_id: productID,
             },
           });
-  
+
           if (oldImages.length > 0) {
             for (const oldImage of oldImages) {
               const oldImagePath = path.join(
@@ -383,8 +388,9 @@ router.delete(
             });
           }
         }
+
+        // delete product in user carts
         if (productCart) {
-          // delete product in user carts
           await tx.cart.deleteMany({
             where: {
               product_id: productID,
@@ -400,16 +406,26 @@ router.delete(
             },
           });
         }
+
+        // delete in orderitem
+        if (productOrderItems) {
+          await tx.orderItem.deleteMany({
+            where: {
+              product_id: productID,
+            },
+          });
+        }
+
+        // actually delete the product
         await tx.product.delete({
           where: {
             id: productID,
           },
         });
-        deleteTransaction = true
+        deleteTransaction = true;
       });
 
       if (deleteTransaction) {
-        // actually delete the product
         return res.status(200).json({
           message: "Product has been deleted",
         });
