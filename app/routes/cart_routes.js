@@ -18,7 +18,9 @@ router.post(
     const { product_id, quantity, size_id } = req.body;
     const user_id = req.user.id;
     // Check if product exists
-    const product = await prisma.product.findFirst(product_id);
+    const product = await prisma.product.findFirst({
+      where: { id: product_id },
+    });
 
     // Check if product with that size is available
     const size = await prisma.productSize.findFirst({
