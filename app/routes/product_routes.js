@@ -213,6 +213,7 @@ router.put(
             price: +price,
             quantity: +quantity,
             description,
+            category_id: +category_id,
             rating: +rating,
             weight: +weight,
             ProductSize: {

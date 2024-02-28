@@ -19,6 +19,20 @@ const main = async () => {
       "Luminary Lady Line Collections",
       "Muse & Magnolia Boutique Haven",
     ];
+    const womensClothingDescriptions = [
+      "Flowy maxi dresses for effortless summer style",
+      "Chic blouses with feminine details for work or play",
+      "Figure-flattering skinny jeans in a range of washes",
+      "Versatile wrap dresses that can be dressed up or down",
+      "Cozy knit cardigans for layering in transitional weather",
+      "Elegant pencil skirts for a polished office look",
+      "Fashionable jumpsuits for a trendy statement outfit",
+      "Stylish ankle boots to complement any outfit",
+      "Fitted blazers for a professional and tailored appearance",
+      "Bohemian-inspired peasant tops for a relaxed vibe",
+      "Statement earrings to add a pop of color to any ensemble",
+      "Luxurious silk scarves to elevate any outfit",
+    ];
     for (let i = 0; i < 12; i++) {
       await prisma.$transaction(async (tx) => {
         const product = await tx.product.create({
@@ -30,9 +44,10 @@ const main = async () => {
               ) * 1000,
             quantity: faker.number.int({ min: 10, max: 100 }),
             weight:
-              (Math.round(+faker.number.int({ min: 90, max: 500 }) / 100) * 100) +90,
+              Math.round(+faker.number.int({ min: 90, max: 500 }) / 100) * 100 +
+              90,
             is_deleted: false,
-            description: faker.commerce.productDescription(),
+            description: womensClothingDescriptions[i],
             category_id: 2,
             rating: faker.number.float({ multipleOf: 0.25, min: 3, max: 5 }),
           },
