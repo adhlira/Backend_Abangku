@@ -299,6 +299,7 @@ router.delete(
         message: "Invalid ID",
       });
     }
+
     const productID = Number(req.params.id);
     try {
       // check if product exists
@@ -337,56 +338,78 @@ router.delete(
         });
       }
 
+      const productImg =  await prisma.productImage.findMany({
+        where: {
+          product_id: productID,
+        }
+      })
+      const productCart = await prisma.cart.findMany({
+        where: {
+          product_id: productID,
+        }
+      })
+      const productSizes = await prisma.productSize.findMany({
+        where: {
+          product_id: productID,
+        }
+      })
+
       // deleting product
       // Starting transaction to delete item
-      const deleteProductTransaction = await prisma.$transaction(async (tx) => {
+      let deleteTransaction = false
+       await prisma.$transaction(async (tx) => {
         // unlink image
-        const oldImages = await tx.productImage.findMany({
-          where: {
-            product_id: productID,
-          },
-        });
-
-        if (oldImages.length > 0) {
-          for (const oldImage of oldImages) {
-            const oldImagePath = path.join(
-              "public/images",
-              oldImage.image_url.split("/").pop()
-            );
-            if (fs.existsSync(oldImagePath)) {
-              fs.unlinkSync(oldImagePath);
-            }
-          }
-          await tx.productImage.deleteMany({
+        if (productImg) {
+          const oldImages = await tx.productImage.findMany({
             where: {
-              product_id: Number(req.params.id),
+              product_id: productID,
+            },
+          });
+  
+          if (oldImages.length > 0) {
+            for (const oldImage of oldImages) {
+              const oldImagePath = path.join(
+                "public/images",
+                oldImage.image_url.split("/").pop()
+              );
+              if (fs.existsSync(oldImagePath)) {
+                fs.unlinkSync(oldImagePath);
+              }
+            }
+            await tx.productImage.deleteMany({
+              where: {
+                product_id: Number(req.params.id),
+              },
+            });
+          }
+        }
+        if (productCart) {
+          // delete product in user carts
+          await tx.cart.deleteMany({
+            where: {
+              product_id: productID,
             },
           });
         }
 
-        // delete product in user carts
-        await tx.cart.deleteMany({
-          where: {
-            product_id: productID,
-          },
-        });
-
         // delete sizes in product
-
-        await tx.productSize.deleteMany({
-          where: {
-            product_id: productID,
-          },
-        });
-      });
-
-      if (deleteProductTransaction) {
-        // actually delete the product
-        await prisma.product.delete({
+        if (productSizes) {
+          await tx.productSize.deleteMany({
+            where: {
+              product_id: productID,
+            },
+          });
+        }
+        await tx.product.delete({
           where: {
             id: productID,
           },
         });
+        deleteTransaction = true
+      });
+
+      if (deleteTransaction) {
+        // actually delete the product
         return res.status(200).json({
           message: "Product has been deleted",
         });
