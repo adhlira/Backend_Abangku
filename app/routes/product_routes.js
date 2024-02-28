@@ -312,42 +312,87 @@ router.delete(
           message: "Product Not Found",
         });
       }
-      // 
-      // deleting product
-      
-      await prisma.product.delete({
+      // check if there are pending orders that have this product
+      const pendingOrders = await prisma.order.findMany({
         where: {
-          id: productID,
-        },
-      });
-      // unlink image
-      const oldImages = await prisma.productImage.findMany({
-        where: {
-          product_id: productID,
+          Order_Items: {
+            some: {
+              product_id: productID,
+            },
+          },
+          OR: [
+            {
+              status: "PENDING",
+            },
+            {
+              status: "CREATED",
+            },
+          ],
         },
       });
 
-      if (oldImages.length > 0) {
-        for (const oldImage of oldImages) {
-          const oldImagePath = path.join(
-            "public/images",
-            oldImage.image_url.split("/").pop()
-          );
-          if (fs.existsSync(oldImagePath)) {
-            fs.unlinkSync(oldImagePath);
-          }
-        }
-        await prisma.productImage.deleteMany({
-          where: {
-            product_id: Number(req.params.id),
-          },
+      if (pendingOrders.length > 0) {
+        return res.status(403).json({
+          message: "Product has pending orders",
         });
       }
 
-      return res.status(200).json({
-        message: "Product has been deleted",
-        product,
+      // deleting product
+      // Starting transaction to delete item
+      const deleteProductTransaction = await prisma.$transaction(async (tx) => {
+        // unlink image
+        const oldImages = await tx.productImage.findMany({
+          where: {
+            product_id: productID,
+          },
+        });
+
+        if (oldImages.length > 0) {
+          for (const oldImage of oldImages) {
+            const oldImagePath = path.join(
+              "public/images",
+              oldImage.image_url.split("/").pop()
+            );
+            if (fs.existsSync(oldImagePath)) {
+              fs.unlinkSync(oldImagePath);
+            }
+          }
+          await tx.productImage.deleteMany({
+            where: {
+              product_id: Number(req.params.id),
+            },
+          });
+        }
+
+        // delete product in user carts
+        await tx.cart.deleteMany({
+          where: {
+            product_id: productID,
+          },
+        });
+
+        // delete sizes in product
+
+        await tx.productSize.deleteMany({
+          where: {
+            product_id: productID,
+          },
+        });
       });
+
+      if (deleteProductTransaction) {
+        // actually delete the product
+        await prisma.product.delete({
+          where: {
+            id: productID,
+          },
+        });
+        return res.status(200).json({
+          message: "Product has been deleted",
+        });
+      } else {
+        throw new Error("Error deleting product");
+      }
     } catch (err) {
       return res.status(500).json({
         message: err.message,
