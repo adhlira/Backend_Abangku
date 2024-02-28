@@ -72,7 +72,7 @@ router.get("/user", authenticateToken, authorize(Permission.READ_USERS), async (
   }
 });
 
-router.put("/user", authenticateToken, authorize(Permission.EDIT_USERS), async (req, res) => {
+router.put("/edit_user", authenticateToken, authorize(Permission.EDIT_USERS), async (req, res) => {
   const user_email = req.user.email;
   const user = await prisma.user.findFirst({ where: { email: user_email } });
   if (!user) {
