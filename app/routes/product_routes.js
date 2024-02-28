@@ -165,8 +165,8 @@ router.post(
 
 router.put(
   "/product/:id",
-  authenticateToken,
-  authorize(Permission.EDIT_PRODUCTS),
+  // authenticateToken,
+  // authorize(Permission.EDIT_PRODUCTS),
   uploadMiddleware,
   validateProductReqBody,
   async (req, res) => {
@@ -285,6 +285,73 @@ router.put(
           updated_product,
         });
       }
+    }
+  }
+);
+
+router.delete(
+  "/product/:id",
+  // authenticateToken,
+  // authorize(Permission.DELETE_PRODUCTS),
+  async (req, res) => {
+    if (isNaN(req.params.id)) {
+      res.status(400).json({
+        message: "Invalid ID",
+      });
+    }
+    const productID = Number(req.params.id);
+    try {
+      // check if product exists
+      const product = await prisma.product.findUniqueOrThrow({
+        where: {
+          id: productID,
+        },
+      });
+      if (!product) {
+        return res.status(404).json({
+          message: "Product Not Found",
+        });
+      }
+      // 
+      // deleting product
+      
+      await prisma.product.delete({
+        where: {
+          id: productID,
+        },
+      });
+      // unlink image
+      const oldImages = await prisma.productImage.findMany({
+        where: {
+          product_id: productID,
+        },
+      });
+
+      if (oldImages.length > 0) {
+        for (const oldImage of oldImages) {
+          const oldImagePath = path.join(
+            "public/images",
+            oldImage.image_url.split("/").pop()
+          );
+          if (fs.existsSync(oldImagePath)) {
+            fs.unlinkSync(oldImagePath);
+          }
+        }
+        await prisma.productImage.deleteMany({
+          where: {
+            product_id: Number(req.params.id),
+          },
+        });
+      }
+
+      return res.status(200).json({
+        message: "Product has been deleted",
+        product,
+      });
+    } catch (err) {
+      return res.status(500).json({
+        message: err.message,
+      });
     }
   }
 );
