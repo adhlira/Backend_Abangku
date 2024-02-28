@@ -13,7 +13,7 @@ dotenv.config();
 const router = express.Router();
 
 router.post("/checkout", authenticateToken, async (req, res) => {
-  const { origin, destination, courier } = req.body;
+  const { origin, destination, courier, discount } = req.body;
   try {
     const user_id = req.user.id;
 
@@ -51,6 +51,11 @@ router.post("/checkout", authenticateToken, async (req, res) => {
 
     console.log(totalPrice, totalWeight);
 
+    // apply discount to total price if discount is provided
+    if (discount) {
+      totalPrice = totalPrice * 0.7;
+    }
+
     const newOrder = await createOrder({
       user_id: user_id,
       status: "CREATED",
@@ -78,9 +83,6 @@ router.post("/checkout", authenticateToken, async (req, res) => {
     console.log("here");
     let fee = 0;
     if (shipmentFee.status === 200) {
-      // console.log(
-      //   shipmentFee.data.rajaongkir.results[0].costs[0].cost[0].value
-      // );
       fee = shipmentFee.data.rajaongkir.results[0].costs[0].cost[0].value;
     }
 
@@ -88,8 +90,6 @@ router.post("/checkout", authenticateToken, async (req, res) => {
       const product = await prisma.product.findFirst({
         where: { id: item.product_id },
       });
-
-      console.log(item);
 
       await createOrderItem({
         order_id: newOrder.id,
